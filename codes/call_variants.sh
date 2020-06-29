@@ -126,9 +126,17 @@ $GATK -T HaplotypeCaller \
   -I ${project_dir}/bams/${sample_name}_jitong_sorted_RG_rmdup_realn_recal.bam \
   -o ${project_dir}/HCaller/${sample_name}_jitong_HCall.vcf
 
-##### Targeted variant calling using GATK haplotype caller and bed file
+#### Targeted variant calling using GATK haplotype caller and bed file
 $INTERSECTBED \
   -a ${project_dir}/HCaller/${sample_name}_jitong_HCall.vcf \
   -b $BED \
   > ${proj_dir}/HCaller/RefinedVCF/vcf_bedtools/${sample_name}_jitong_HCall_bedtools.vcf
+
+## then manually remove variants located between chr6:100,000,000 - chr6:130,000,000
+## save the refined vcf as ${sample_name}_bedtools_chr6adj.vcf
   
+#### break records with multialleles and remove duplicates	
+$BCFTOOLS norm -m -any -NO z -O v -o \
+  - ${proj_dir}/HCaller/RefinedVCF/vcf_bedtools/${sample_name}_bedtools_chr6adj.vcf \
+  | $BCFTOOLS norm -d none -f $REF \
+  -o ${proj_dir}/HCaller/RefinedVCF/vcf_bedtools/${sample_name}_bedtools_chr6adj_rmdup.vcf

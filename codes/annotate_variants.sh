@@ -10,8 +10,13 @@ sample_name=RAD18WT8_TTAGGC_L002
 #### Path to tools
 ANNOVAR_PL=/nas/longleaf/apps/annovar/20180416/annovar
 GATK=/nas02/apps/biojars-1.0/GenomeAnalysisTK-3.4-46/GenomeAnalysisTK.jar
+BCFTOOLS=/nas/longleaf/apps/samtools/1.9/bin/bcftools
 
-#### Download files of mouse genomes (on 11/06/2019)
+#### path to external files
+REF=${ref_dir}/mm10_wgs_genome.fa
+
+
+#### download files of mouse genomes (on 11/06/2019)
 cd ${annovar_dir}/mousedb
 wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M23/GRCm38.p6.genome.fa.gz
 wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M23/gencode.vM23.chr_patch_hapl_scaff.annotation.gff3.gz
@@ -39,14 +44,14 @@ ${ANNOVAR_PL}/retrieve_seq_from_fasta.pl \
 
 #### annote variants using ANNOVAR
 ${ANNOVAR_PL}/table_annovar.pl \
-    ${in_dir}/${sample_name}_bedtools_chr6adj.vcf --vcfinput \
+    ${in_dir}/${sample_name}_bedtools_chr6adj_dup.vcf --vcfinput \
 	${annovar_dir}/mousedb/ \
 	--outfile ${out_dir}/${sample_name}_bedtools_final \
 	--buildver mm10 --protocol ensGene --operation g
 
-#### Parse the INFO column in the VCF file and extract the information of interested filters
+#### parse the INFO column in the VCF file and extract the information of interested filters
 $GATK -T VariantsToTable \
-    -R ${ref_dir}/mm10_wgs_genome.fa \
+    -R $REF \
 	-V ${out_dir}/${sample_name}_bedtools_final.mm10_multianno.vcf \
 	-F CHROM -F POS -F REF -F ALT -F QUAL -F FILTER -F DP \
 	-F Func.ensGene -F Gene.ensGene -F GeneDetail.ensGene \
